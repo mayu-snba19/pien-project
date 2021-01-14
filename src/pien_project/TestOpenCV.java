@@ -25,6 +25,10 @@ public class TestOpenCV {
 	static Scanner sc;
     static CascadeClassifier faceDetector;
     static Mat faceImg; //入力画像
+    static String inputFileName;
+    static String inputFilePass;
+    static String outputFileName;
+    static String outputFilePass;
     static MatOfRect faceDetections;
     static Rect[] facesArray ;
     static Set<Integer> pienRegisterSet; //ぴえんをつける人を登録するSet
@@ -33,11 +37,26 @@ public class TestOpenCV {
 	public static void ready() {
         sc = new Scanner(System.in);
         faceDetector= new CascadeClassifier("/usr/local/Cellar/opencv/4.5.1_2/share/opencv4/haarcascades/haarcascade_frontalface_alt.xml");
+//        faceDetector= new CascadeClassifier("/usr/local/Cellar/opencv/4.5.0_5/share/opencv4/haarcascades/haarcascade_frontalface_alt.xml");
         iio=new ImageIO2();
         bip=new BasicImageProcessing();
-        faceImg = iio.readImage("src/image/family.jpg");
+        faceImg = iio.readImage(inputFilePass);
+//        faceImg = iio.readImage("src/image/family.jpg");
         num=0; //0人で初期化
 	}
+
+	//入力・出力ファイルの標準入力を受け付ける
+	public static void input() {
+		Scanner sc = new Scanner(System.in);
+	    System.out.print("顔を検出したいファイル名を入力してください: ");
+	    inputFileName = sc.next();
+	    System.out.print("出力するファイル名を入力してください: ");
+	    outputFileName = sc.next();
+	    sc.close();
+	    inputFilePass = "src/image/"+inputFileName;
+	    outputFilePass = "src/out-image/"+outputFileName;
+	}
+
 
 	//顔を認識
 	public static void detect() {
@@ -116,7 +135,7 @@ public class TestOpenCV {
         BufferedImage bufferedImage2=null;
 
         try {
-        	bufferedImage1=ImageIO.read(new File("src/image/family.jpg"));
+        	bufferedImage1=ImageIO.read(new File(inputFilePass));
           	bufferedImage2=ImageIO.read(new File("src/image/pien.PNG"));
         }catch(Exception e){
         	e.printStackTrace();
@@ -125,7 +144,8 @@ public class TestOpenCV {
         for(Integer n:pienRegisterSet) {
         	 try {
         		 if(boo) { //2回目以降
-        			bufferedImage1=ImageIO.read(new File("src/out-image/stamped.png"));
+        			bufferedImage1=ImageIO.read(new File(outputFilePass));
+//        			bufferedImage1=ImageIO.read(new File("src/out-image/stamped.png"));
              	}
              	BufferedImage bufferedImage3 = new BufferedImage(facesArray[n-1].width, facesArray[n-1].height, BufferedImage.TYPE_INT_ARGB);
              	bufferedImage3.createGraphics().drawImage(bufferedImage2.getScaledInstance(
@@ -135,7 +155,8 @@ public class TestOpenCV {
      			int x = facesArray[n-1].x;
      			int y = facesArray[n-1].y;
      			graphics1.drawImage(bufferedImage3, x, y, null);
-     			ImageIO.write(bufferedImage1, "png", new File("src/out-image/stamped.png"));
+     			ImageIO.write(bufferedImage1, "png", new File(outputFilePass));
+//     			ImageIO.write(bufferedImage1, "png", new File("src/out-image/stamped.png"));
              }catch(Exception e) {
              	e.printStackTrace();
              }finally {
@@ -164,6 +185,7 @@ public class TestOpenCV {
     public static void main (String [] args){
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         ready();
+        input();
         detect();
         userInput();
 		putImg();
