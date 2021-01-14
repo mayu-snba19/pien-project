@@ -104,50 +104,27 @@ public class TestOpenCV {
         }
 
 
-        //setに登録された顔に四角をつける
-//        for(Integer n : pienRegisterSet) {
-//            Imgproc.rectangle(faceImg, new Point(facesArray[n-1].x, facesArray[n-1].y), new Point(facesArray[n-1].x + facesArray[n-1].width, facesArray[n-1].y +facesArray[n-1].height), new Scalar(0, 255, 0));
-//        }
-
         //画像を貼り付ける
         Mat paste_result=null;
-
-        int cnt=0;
+        Boolean boo=false;
 
         for(Integer n:pienRegisterSet) {
-        	if(cnt==0) {//初回
-        		double max=Math.max(facesArray[n-1].width, facesArray[n-1].height);
-            	double scope=(double)pienImg.cols()/max;
-
-            	Mat resizePien = bip.resizeImage(pienImg,scope); //resize the image (1/4-size)
-            	//ぴえんを適切なサイズに変更する
-            	System.out.println(facesArray[n-1].height+" "+facesArray[n-1].width);
-
-            	paste_result=bip.imposeImage(faceImg,resizePien,
-            		new Point((facesArray[n-1].x),(facesArray[n-1].y)),
-            		new Size(resizePien.cols(),resizePien.rows())
-            	);
-            	iio.saveImage("src/out-image/stamped.jpg",paste_result);
-        	}else { //2回目以降
-        		double max=Math.max(facesArray[n-1].width, facesArray[n-1].height);
-            	double scope=(double)pienImg.cols()/max;
-
-            	Mat resizePien = bip.resizeImage(pienImg,scope); //resize the image (1/4-size)
-            	//ぴえんを適切なサイズに変更する
-            	System.out.println(facesArray[n-1].height+" "+facesArray[n-1].width);
+        	if(boo) { //2回目以降
             	faceImg=iio.readImage("src/out-image/stamped.jpg");
-
-            	paste_result=bip.imposeImage(faceImg,resizePien,
-            		new Point((facesArray[n-1].x),(facesArray[n-1].y)),
-            		new Size(resizePien.cols(),resizePien.rows())
-            	);
-            	iio.saveImage("src/out-image/stamped.jpg",paste_result);
-
         	}
-        	cnt++;
-        }
-	}
+    		double max=Math.max(facesArray[n-1].width, facesArray[n-1].height);
+        	double scope=(double)pienImg.cols()/max;
 
+        	Mat resizePien = bip.resizeImage(pienImg,scope); //ぴえんを適切なサイズに変更
+        	paste_result=bip.imposeImage(faceImg,resizePien,
+        		new Point((facesArray[n-1].x),(facesArray[n-1].y)),
+        		new Size(resizePien.cols(),resizePien.rows())
+        	);
+        	iio.saveImage("src/out-image/stamped.jpg",paste_result);
+        	boo=true;
+        }
+        System.out.println("ぴえん画像を保存しました！");
+	}
 
 	  //入力された値がintかどうかを判定するメソッド
 	  private static boolean isInt(String n) {
@@ -166,8 +143,6 @@ public class TestOpenCV {
 	//メインメソッド
     public static void main (String [] args){
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-        iio = new ImageIO();
-        bip = new BasicImageProcessing();
         ready();
         detect();
         putImg();
