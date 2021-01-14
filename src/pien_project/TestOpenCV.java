@@ -29,7 +29,7 @@ public class TestOpenCV {
         faceDetector= new CascadeClassifier("/usr/local/Cellar/opencv/4.5.1_2/share/opencv4/haarcascades/haarcascade_frontalface_alt.xml");
         iio=new ImageIO();
         bip=new BasicImageProcessing();
-        faceImg = iio.readImage("src/image/face.jpg");
+        faceImg = iio.readImage("src/image/three.jpeg");
         pienImg=iio.readImage("src/image/pien.PNG");
         num=0; //0人で初期化
 	}
@@ -110,35 +110,42 @@ public class TestOpenCV {
 //        }
 
         //画像を貼り付ける
+        Mat paste_result=null;
+
+        int cnt=0;
 
         for(Integer n:pienRegisterSet) {
-        	int max=Math.max(pienImg.cols(), pienImg.rows());
+        	if(cnt==0) {//初回
+        		double max=Math.max(facesArray[n-1].width, facesArray[n-1].height);
+            	double scope=(double)pienImg.cols()/max;
 
-        	Mat resizePien = bip.resizeImage(pienImg, 2.5); //resize the image (1/4-size)
-        	//ぴえんを適切なサイズに変更する
-        	System.out.println(facesArray[n-1].height+" "+facesArray[n-1].width);
+            	Mat resizePien = bip.resizeImage(pienImg,scope); //resize the image (1/4-size)
+            	//ぴえんを適切なサイズに変更する
+            	System.out.println(facesArray[n-1].height+" "+facesArray[n-1].width);
 
-        	Mat paste_result=bip.imposeImage(faceImg,resizePien,
-        		new Point((facesArray[n-1].x),(facesArray[n-1].y)),
-        		new Size(resizePien.cols(),resizePien.rows())
-        	);
-        	iio.saveImage("src/out-image/stamped.jpg",paste_result);
+            	paste_result=bip.imposeImage(faceImg,resizePien,
+            		new Point((facesArray[n-1].x),(facesArray[n-1].y)),
+            		new Size(resizePien.cols(),resizePien.rows())
+            	);
+            	iio.saveImage("src/out-image/stamped.jpg",paste_result);
+        	}else { //2回目以降
+        		double max=Math.max(facesArray[n-1].width, facesArray[n-1].height);
+            	double scope=(double)pienImg.cols()/max;
+
+            	Mat resizePien = bip.resizeImage(pienImg,scope); //resize the image (1/4-size)
+            	//ぴえんを適切なサイズに変更する
+            	System.out.println(facesArray[n-1].height+" "+facesArray[n-1].width);
+            	faceImg=iio.readImage("src/out-image/stamped.jpg");
+
+            	paste_result=bip.imposeImage(faceImg,resizePien,
+            		new Point((facesArray[n-1].x),(facesArray[n-1].y)),
+            		new Size(resizePien.cols(),resizePien.rows())
+            	);
+            	iio.saveImage("src/out-image/stamped.jpg",paste_result);
+
+        	}
+        	cnt++;
         }
-//
-//        Mat small = bip.resizeImage(faceImg, 4); //resize the image (1/4-size)
-//        Mat paste_small = bip.resizeImage(pienImg, 2);
-//        Mat paste_result = bip.imposeImage(small, paste_small,
-//           new Point ( (small.cols()-paste_small.cols()-1), (small.rows()-paste_small.rows()-1) ),
-//           new Size (paste_small.cols(), paste_small.rows())
-//           );
-//        iio.saveImage("src/out-image/stamped.jpg", paste_result);
-
-
-
-        // ファイルの生成
-        String filename = "faceDetection.png";
-        System.out.println(String.format("ファイル %s を生成しました。", filename));
-//	        Imgcodecs.imwrite(filename,faceImg);
 	}
 
 
