@@ -1,36 +1,41 @@
 package pien_project;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
 
+import javax.imageio.ImageIO;
+
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
-import org.opencv.core.Point;
 import org.opencv.core.Rect;
-import org.opencv.core.Size;
 import org.opencv.objdetect.CascadeClassifier;
 
 
+
+
 public class TestOpenCV {
-	static ImageIO iio;
+	static ImageIO2 iio;
 	static BasicImageProcessing bip;
 	static int num; //認識できた人数
 	static Scanner sc;
     static CascadeClassifier faceDetector;
     static Mat faceImg; //入力画像
-    static Mat pienImg; //ぴえん画像
     static MatOfRect faceDetections;
     static Rect[] facesArray ;
+    static Set<Integer> pienRegisterSet; //ぴえんをつける人を登録するSet
 
     //準備
 	public static void ready() {
         sc = new Scanner(System.in);
         faceDetector= new CascadeClassifier("/usr/local/Cellar/opencv/4.5.1_2/share/opencv4/haarcascades/haarcascade_frontalface_alt.xml");
-        iio=new ImageIO();
+        iio=new ImageIO2();
         bip=new BasicImageProcessing();
-        faceImg = iio.readImage("src/image/three.jpeg");
-        pienImg=iio.readImage("src/image/pien.PNG");
+        faceImg = iio.readImage("src/image/family.jpg");
         num=0; //0人で初期化
 	}
 
@@ -67,10 +72,10 @@ public class TestOpenCV {
 	    }
 	}
 
-	//貼り付け
-	public static void putImg() {
+	//入力
+	public static void userInput() {
 	    boolean continueFlag = true;
-        Set<Integer> pienRegisterSet = new HashSet<Integer>();
+        pienRegisterSet = new HashSet<Integer>();
 
         while(continueFlag) {
             String n;
@@ -102,27 +107,42 @@ public class TestOpenCV {
             	System.out.println("【エラー】int型の数値を入力してください。");
             }
         }
+	}
 
-
-        //画像を貼り付ける
-        Mat paste_result=null;
+	public static void putImg() {
+		//画像を貼り付ける
         Boolean boo=false;
+        BufferedImage bufferedImage1=null;
+        BufferedImage bufferedImage2=null;
 
-        for(Integer n:pienRegisterSet) {
-        	if(boo) { //2回目以降
-            	faceImg=iio.readImage("src/out-image/stamped.jpg");
-        	}
-    		double max=Math.max(facesArray[n-1].width, facesArray[n-1].height);
-        	double scope=(double)pienImg.cols()/max;
-
-        	Mat resizePien = bip.resizeImage(pienImg,scope); //ぴえんを適切なサイズに変更
-        	paste_result=bip.imposeImage(faceImg,resizePien,
-        		new Point((facesArray[n-1].x),(facesArray[n-1].y)),
-        		new Size(resizePien.cols(),resizePien.rows())
-        	);
-        	iio.saveImage("src/out-image/stamped.jpg",paste_result);
-        	boo=true;
+        try {
+        	bufferedImage1=ImageIO.read(new File("src/image/family.jpg"));
+          	bufferedImage2=ImageIO.read(new File("src/image/pien.PNG"));
+        }catch(Exception e){
+        	e.printStackTrace();
         }
+        Graphics graphics1=null;
+        for(Integer n:pienRegisterSet) {
+        	 try {
+        		 if(boo) { //2回目以降
+        			bufferedImage1=ImageIO.read(new File("src/out-image/stamped.png"));
+             	}
+             	BufferedImage bufferedImage3 = new BufferedImage(facesArray[n-1].width, facesArray[n-1].height, BufferedImage.TYPE_INT_ARGB);
+             	bufferedImage3.createGraphics().drawImage(bufferedImage2.getScaledInstance(
+             			facesArray[n-1].width, facesArray[n-1].height, Image.SCALE_AREA_AVERAGING)
+             			  ,0, 0, facesArray[n-1].width, facesArray[n-1].width, null);
+     			graphics1 = bufferedImage1.getGraphics();
+     			int x = facesArray[n-1].x;
+     			int y = facesArray[n-1].y;
+     			graphics1.drawImage(bufferedImage3, x, y, null);
+     			ImageIO.write(bufferedImage1, "png", new File("src/out-image/stamped.png"));
+             }catch(Exception e) {
+             	e.printStackTrace();
+             }finally {
+             }
+        	 boo=true;
+        }
+		graphics1.dispose();
         System.out.println("ぴえん画像を保存しました！");
 	}
 
@@ -145,7 +165,9 @@ public class TestOpenCV {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         ready();
         detect();
-        putImg();
+        userInput();
+		putImg();
+
         sc.close();
     }
 }

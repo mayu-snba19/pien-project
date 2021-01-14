@@ -9,7 +9,7 @@ import org.opencv.core.Mat;
 import org.opencv.imgcodecs.Imgcodecs;
 
 
-public class ImageIO {
+public class ImageIO2 {
 
     //[method]
 
