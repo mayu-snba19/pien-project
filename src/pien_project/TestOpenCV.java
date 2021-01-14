@@ -1,29 +1,163 @@
 package pien_project;
-
+import java.util.HashSet;
+import java.util.Scanner;
+import java.util.Set;
 
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfRect;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
 import org.opencv.core.Size;
+import org.opencv.objdetect.CascadeClassifier;
+
 
 public class TestOpenCV {
+	static ImageIO iio;
+	static BasicImageProcessing bip;
+	static int num; //認識できた人数
+	static Scanner sc;
+    static CascadeClassifier faceDetector;
+    static Mat faceImg; //入力画像
+    static Mat pienImg; //ぴえん画像
+    static MatOfRect faceDetections;
+    static Rect[] facesArray ;
+
+    //準備
+	public static void ready() {
+        sc = new Scanner(System.in);
+        faceDetector= new CascadeClassifier("/usr/local/Cellar/opencv/4.5.1_2/share/opencv4/haarcascades/haarcascade_frontalface_alt.xml");
+        iio=new ImageIO();
+        bip=new BasicImageProcessing();
+        faceImg = iio.readImage("src/image/face.jpg");
+        pienImg=iio.readImage("src/image/pien.PNG");
+        num=0; //0人で初期化
+	}
+
+	//顔を認識
+	public static void detect() {
+		faceDetections = new MatOfRect();
+		// ファイルから顔を認識する
+	    faceDetector.detectMultiScale(faceImg, faceDetections);
+	    num = faceDetections.toArray().length;
+        facesArray= new Rect[num];
+	    sort();
+    }
+
+	//x座標が小さい順にソート
+	public static void sort() {
+		//x座標順に並び替え
+	    if(num == 0) {
+	    	System.out.println("顔を検出できませんでした。他のファイルで試してみてください。");
+	    	System.exit(1);
+	    }else {
+	        System.out.println(String.format("%sつの顔を検出しました。", faceDetections.toArray().length));
+	        for(int i=0 ; i<num ; i++) {
+	        	facesArray[i] = faceDetections.toArray()[i];
+	        }
+	        for(int i=0 ; i<num ; i++) {
+	        	int j = i;
+	        	while(j>0 && facesArray[j-1].x > facesArray[j].x) {
+	                Rect tmp = facesArray[j];
+	                facesArray[j] = facesArray[j-1];
+	                facesArray[j-1] = tmp;
+	                j--;
+	        	}
+	        }
+	    }
+	}
+
+	//貼り付け
+	public static void putImg() {
+	    boolean continueFlag = true;
+        Set<Integer> pienRegisterSet = new HashSet<Integer>();
+
+        while(continueFlag) {
+            String n;
+            String YorN;
+            System.out.print("左から何番目の人にぴえんをつけますか？: ");
+            //何番目にぴえんをつけるか
+            n = sc.next();
+            if(isInt(n)) {
+            	int nn = Integer.parseInt(n);
+            	if(nn > num || nn < 1) {
+            		System.out.println("【エラー】数値 " + n + " は指定できません。1から" + num + "の間で指定してください。");
+            		continue;
+            	}
+            	pienRegisterSet.add(nn);
+            	boolean YorNFlag  =true;
+            	while(YorNFlag) {
+            		System.out.print("他の人にもぴえんをつけますか？ [yes/no]: ");
+            		YorN = sc.next();
+            		if(YorN.equals("yes")) {
+            			YorNFlag = false;
+            		}else if(YorN.equals("no")) {
+            			YorNFlag = false;
+            			continueFlag = false;
+            		}else {
+            			System.out.println("【エラー】yes か no で入力してください。");
+            		}
+            	}
+            }else {
+            	System.out.println("【エラー】int型の数値を入力してください。");
+            }
+        }
+
+
+        //setに登録された顔に四角をつける
+//        for(Integer n : pienRegisterSet) {
+//            Imgproc.rectangle(faceImg, new Point(facesArray[n-1].x, facesArray[n-1].y), new Point(facesArray[n-1].x + facesArray[n-1].width, facesArray[n-1].y +facesArray[n-1].height), new Scalar(0, 255, 0));
+//        }
+
+        //画像を貼り付ける
+
+        for(Integer n:pienRegisterSet) {
+        	//ぴえんを適切なサイズに変更する
+
+        	Mat past_result=bip.imposeImage(pienImg,
+        		new Point((),()),
+        		new Size()
+        	);
+        }
+//
+//        Mat small = bip.resizeImage(faceImg, 4); //resize the image (1/4-size)
+//        Mat paste_small = bip.resizeImage(pienImg, 2);
+//        Mat paste_result = bip.imposeImage(small, paste_small,
+//           new Point ( (small.cols()-paste_small.cols()-1), (small.rows()-paste_small.rows()-1) ),
+//           new Size (paste_small.cols(), paste_small.rows())
+//           );
+//        iio.saveImage("src/out-image/stamped.jpg", paste_result);
+
+
+
+        // ファイルの生成
+        String filename = "faceDetection.png";
+        System.out.println(String.format("ファイル %s を生成しました。", filename));
+//	        Imgcodecs.imwrite(filename,faceImg);
+	}
+
+
+	  //入力された値がintかどうかを判定するメソッド
+	  private static boolean isInt(String n) {
+		  boolean intFlag = true;
+	      for(int i=0 ; i<n.length() ; i++) {
+	      	if(Character.isDigit(n.charAt(i))) {
+	      		continue;
+	      	}else {
+	      		intFlag = false;
+	      		break;
+	      	}
+	      }
+	      return intFlag;
+	  }
+
+	//メインメソッド
     public static void main (String [] args){
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-
-        ImageIO iio = new ImageIO();
-        BasicImageProcessing bip = new BasicImageProcessing();
-
-
-        Mat read_img = iio.readImage("src/image/face.jpg");
-        Mat small = bip.resizeImage(read_img, 4); //resize the image (1/4-size)
-//        iio.saveImage("src/mid-image/small_face.jpg", small);
-
-        Mat paste = iio.readImage("src/image/pien.PNG");
-        Mat paste_small = bip.resizeImage(paste, 2);
-        Mat paste_result = bip.imposeImage(small, paste_small,
-           new Point ( (small.cols()-paste_small.cols()-1), (small.rows()-paste_small.rows()-1) ),
-           new Size (paste_small.cols(), paste_small.rows())
-           );
-        iio.saveImage("src/out-image/stamped.jpg", paste_result);
+        iio = new ImageIO();
+        bip = new BasicImageProcessing();
+        ready();
+        detect();
+        sc.close();
     }
 }
