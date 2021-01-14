@@ -112,12 +112,17 @@ public class TestOpenCV {
         //画像を貼り付ける
 
         for(Integer n:pienRegisterSet) {
-        	//ぴえんを適切なサイズに変更する
+        	int max=Math.max(pienImg.cols(), pienImg.rows());
 
-        	Mat past_result=bip.imposeImage(pienImg,
-        		new Point((),()),
-        		new Size()
+        	Mat resizePien = bip.resizeImage(pienImg, 2.5); //resize the image (1/4-size)
+        	//ぴえんを適切なサイズに変更する
+        	System.out.println(facesArray[n-1].height+" "+facesArray[n-1].width);
+
+        	Mat paste_result=bip.imposeImage(faceImg,resizePien,
+        		new Point((facesArray[n-1].x),(facesArray[n-1].y)),
+        		new Size(resizePien.cols(),resizePien.rows())
         	);
+        	iio.saveImage("src/out-image/stamped.jpg",paste_result);
         }
 //
 //        Mat small = bip.resizeImage(faceImg, 4); //resize the image (1/4-size)
@@ -158,6 +163,7 @@ public class TestOpenCV {
         bip = new BasicImageProcessing();
         ready();
         detect();
+        putImg();
         sc.close();
     }
 }

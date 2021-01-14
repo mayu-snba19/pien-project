@@ -21,12 +21,12 @@ public class BasicImageProcessing {
     //ratio: value for the down-sampling magnitude
     //@return
     //down-sampled image
-    public Mat resizeImage (Mat input_img, int ratio){
+    public Mat resizeImage (Mat input_img, double d){
 
         Mat dst = new Mat();
         int inputWidth = input_img.cols();
         int inputHeight = input_img.rows();
-        Imgproc.resize(input_img, dst, new Size ( (int)(inputWidth/ratio), (int)(inputHeight/ratio) ) );
+        Imgproc.resize(input_img, dst, new Size ( (double)(inputWidth/d), (double)(inputHeight/d) ) );
 
         return dst.clone();
     }
