@@ -2,9 +2,9 @@
 「PienMaker」では画像から顔を認識し、任意の顔にぴえんをつけることができます。
  
 # DEMO
-[family.jpg](src/image/family.jpg)  
-↓  
-[pien-family.jpg](src/out-image/pien-family.jpg)
+![family.jpg](src/image/family.jpg)  
+↓  上の画像がこうなります。
+![pien-family.jpg](src/out-image/pien-family.jpg)
   
 # Requirement
 
@@ -12,7 +12,7 @@
 - OpenCV 4.5.1
  
 # Usage
-[demo.png](src/image/demo.png)
+![demo.png](src/image/demo.png)
 
 # Note
 readyメソッドのfaceDetectorを自身のコンピュータのhaarcascade_frontalface_alt.xmlパスに書き換えてください。
