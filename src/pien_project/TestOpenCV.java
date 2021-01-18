@@ -15,9 +15,6 @@ import org.opencv.core.MatOfRect;
 import org.opencv.core.Rect;
 import org.opencv.objdetect.CascadeClassifier;
 
-
-
-
 public class TestOpenCV {
 	static ImageIO2 iio;
 	static BasicImageProcessing bip;
@@ -176,7 +173,7 @@ public class TestOpenCV {
 	  }
 
 	//メインメソッド
-    public static void main (String [] args){
+    public static void main (String[] args){
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         ready();
         input();
